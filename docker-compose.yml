@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:16.1-alpine3.18
+    env_file:
+      - .env
+    expose:
+      - 5432
+    networks:
+      - dbaccess-network
+    volumes:
+      - postgresdata:/var/lib/postgresql/data/
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 30s
+      timeout: 60s
+      retries: 10
+
+  web:
+    build: ./dbaccess
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./dbaccess:/code
+    ports:
+      - "8000:8000"
+    networks:
+      - dbaccess-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+networks:
+  dbaccess-network:
+    driver: bridge
+
+volumes:
+  postgresdata:
