@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
 
     "dashboard.apps.DashboardConfig",
+    "console_user_management.apps.ConsoleUserManagementConfig",
 ]
 
 MIDDLEWARE = [
@@ -128,6 +129,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 VERSION = "beta"
 RELEASE_DATE = "2023.12"
+
+AUTH_USER_MODEL = "console_user_management.User"
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
