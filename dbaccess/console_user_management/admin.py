@@ -3,6 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 
 from console_user_management.forms import CustomUserCreationForm, CustomUserChangeForm
 from console_user_management.models import User
+from console_user_management.models import Role
 
 
 class CustomUserAdmin(UserAdmin):
@@ -22,10 +23,11 @@ class CustomUserAdmin(UserAdmin):
                 "email", "password1", "password2", "is_staff",
                 "is_active", "groups", "user_permissions"
             )}
-        ),
+         ),
     )
     search_fields = ("email",)
     ordering = ("email",)
 
 
 admin.site.register(User, CustomUserAdmin)
+admin.site.register(Role)

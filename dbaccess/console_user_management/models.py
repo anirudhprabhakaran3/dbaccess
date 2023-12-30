@@ -18,3 +18,9 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+class Role(models.Model):
+    role_name = models.CharField(max_length=200, blank=False, null=False, unique=True)
+    role_description = models.TextField(blank=True, null=True)
+    role_expiry = models.DateTimeField(blank=False, null=False)
