@@ -4,6 +4,8 @@ from django.contrib.auth.admin import UserAdmin
 from console_user_management.forms import CustomUserCreationForm, CustomUserChangeForm
 from console_user_management.models import User
 from console_user_management.models import Role
+from console_user_management.models import Permission
+from console_user_management.models import RolePermissionAssignment
 
 
 class CustomUserAdmin(UserAdmin):
@@ -31,3 +33,5 @@ class CustomUserAdmin(UserAdmin):
 
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Role)
+admin.site.register(Permission)
+admin.site.register(RolePermissionAssignment)
