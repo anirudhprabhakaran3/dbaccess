@@ -24,7 +24,6 @@ ROLE_PERMISSION_OPTIONS = [
     ("0", "None"),
     ("1", "View Reports"),
     ("2", "Create/Modify"),
-    ("3", "Both")
 ]
 
 
@@ -51,3 +50,11 @@ class RolePermissionAssignment(models.Model):
 
     def __str__(self):
         return f"{self.role} - {self.permission}"
+
+class UserRoleAssignment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    expiry_date = models.DateTimeField(blank=False, null=False)
+
+    def __str__(self):
+        return f"{self.user} - {self.role}"
