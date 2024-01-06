@@ -56,3 +56,6 @@ class UserRoleAssignmentForm(forms.ModelForm):
 
 class UserSelectionForm(forms.Form):
     user = forms.ModelChoiceField(queryset=User.objects.all())
+
+class RoleSelectionForm(forms.Form):
+    role = forms.ModelChoiceField(queryset=Role.objects.all())

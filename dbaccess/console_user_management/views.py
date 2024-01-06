@@ -8,6 +8,7 @@ from console_user_management.forms import (
     UserRoleAssignmentForm,
     UserSelectionForm,
     CustomUserChangeForm,
+    RoleSelectionForm
 )
 from console_user_management.models import User, Permission, RolePermissionAssignment
 
@@ -138,3 +139,21 @@ def user_deletion(request):
     args = {"form": form}
 
     return render(request, "console_user_management/user_deletion.html", args)
+
+@login_required
+def role_deletion(request):
+    if request.method == "POST":
+        form = RoleSelectionForm(request.POST)
+        if form.is_valid():
+            role = form.cleaned_data.get("role")
+            role.delete()
+            messages.success(request, "Role deleted successfully!")
+            return redirect("role_deletion")
+        else:
+            args = {"form": form}
+            return render(request, "console_user_management/role_deletion.html", args)
+    
+    form = RoleSelectionForm()
+    args = {"form": form}
+
+    return render(request, "console_user_management/role_deletion.html", args)

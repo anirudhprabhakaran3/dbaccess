@@ -12,9 +12,10 @@ urlpatterns = [
     ),
     path("user_modification/", views.user_modification, name="user_modification"),
     path(
-        "user_modification/<int:pk>",
+        "user_modification/<int:pk>/",
         views.user_modification_form,
         name="user_modification_form",
     ),
-    path("user_deletion", views.user_deletion, name="user_deletion"),
+    path("user_deletion/", views.user_deletion, name="user_deletion"),
+    path("role_deletion/", views.role_deletion, name="role_deletion"),
 ]
