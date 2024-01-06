@@ -10,4 +10,10 @@ urlpatterns = [
         views.user_role_assignment,
         name="user_role_assignment",
     ),
+    path("user_modification/", views.user_modification, name="user_modification"),
+    path(
+        "user_modification/<int:pk>",
+        views.user_modification_form,
+        name="user_modification_form",
+    ),
 ]

@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from console_user_management.forms import (
@@ -6,8 +6,10 @@ from console_user_management.forms import (
     RoleCreationForm,
     RolePermissionAssignmentForm,
     UserRoleAssignmentForm,
+    UserSelectionForm,
+    CustomUserChangeForm,
 )
-from console_user_management.models import Permission, RolePermissionAssignment
+from console_user_management.models import User, Permission, RolePermissionAssignment
 
 
 # Create your views here.
@@ -82,3 +84,40 @@ def user_role_assignment(request):
     args = {"form": form}
 
     return render(request, "console_user_management/user_role_assignment.html", args)
+
+
+@login_required
+def user_modification(request):
+    if request.method == "POST":
+        form = UserSelectionForm(request.POST)
+        if form.is_valid():
+            user = form.cleaned_data.get("user")
+            return redirect("user_modification_form", pk=user.pk)
+        else:
+            return render(
+                request, "console_user_management/user_selection.html", {"form": form}
+            )
+
+    form = UserSelectionForm()
+    args = {"form": form}
+    return render(request, "console_user_management/user_selection.html", args)
+
+
+@login_required
+def user_modification_form(request, pk):
+    user = get_object_or_404(User, pk=pk)
+
+    if request.method == "POST":
+        form = CustomUserChangeForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"User {user.email} modified successfully!")
+            return redirect("user_modification")
+        else:
+            return render(
+                request, "console_user_management/user_selection.html", {"form": form}
+            )
+
+    form = CustomUserChangeForm(instance=user)
+    args = {"form": form}
+    return render(request, "console_user_management/user_modification_form.html", args)

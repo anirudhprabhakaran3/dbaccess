@@ -1,0 +1,30 @@
+{% extends 'console_user_management/base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}
+User Modification Form
+{{ block.super }}
+{% endblock %}
+
+{% block mainbar %}
+<div class="p-1">
+    <h2>User Role Association</h2>
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">
+        {{ message }}
+    </div>
+    {% endfor %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form | crispy }}
+        <button type="submit" class="btn btn-primary">Update User</button>
+    </form>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#{{ form.user.auto_id }}").select2();
+    })
+</script>
+{% endblock %}

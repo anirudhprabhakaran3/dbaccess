@@ -21,6 +21,8 @@ class CustomUserCreationForm(UserCreationForm):
 
 
 class CustomUserChangeForm(UserChangeForm):
+    password = None
+
     class Meta:
         model = User
         fields = ("email", "first_name", "last_name")
@@ -50,3 +52,7 @@ class UserRoleAssignmentForm(forms.ModelForm):
         fields = ("user", "role", "expiry_date")
 
         widgets = {"expiry_date": forms.DateTimeInput(attrs={"type": "datetime-local"})}
+
+
+class UserSelectionForm(forms.Form):
+    user = forms.ModelChoiceField(queryset=User.objects.all())
