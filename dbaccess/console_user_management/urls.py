@@ -16,4 +16,5 @@ urlpatterns = [
         views.user_modification_form,
         name="user_modification_form",
     ),
+    path("user_deletion", views.user_deletion, name="user_deletion"),
 ]

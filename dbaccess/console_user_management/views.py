@@ -121,3 +121,20 @@ def user_modification_form(request, pk):
     form = CustomUserChangeForm(instance=user)
     args = {"form": form}
     return render(request, "console_user_management/user_modification_form.html", args)
+
+
+@login_required
+def user_deletion(request):
+    if request.method == "POST":
+        form = UserSelectionForm(request.POST)
+        if form.is_valid():
+            user = form.cleaned_data.get("user")
+            user.delete()
+            messages.success(request, "User deleted successfully.")
+            return redirect("user_deletion")
+
+    form = UserSelectionForm()
+
+    args = {"form": form}
+
+    return render(request, "console_user_management/user_deletion.html", args)

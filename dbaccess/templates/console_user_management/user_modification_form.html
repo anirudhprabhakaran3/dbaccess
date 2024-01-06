@@ -9,7 +9,7 @@ User Modification Form
 
 {% block mainbar %}
 <div class="p-1">
-    <h2>User Role Association</h2>
+    <h2>User Modification Form</h2>
     {% for message in messages %}
     <div class="alert alert-{{ message.tags }}">
         {{ message }}
@@ -21,10 +21,4 @@ User Modification Form
         <button type="submit" class="btn btn-primary">Update User</button>
     </form>
 </div>
-
-<script>
-    $(document).ready(function () {
-        $("#{{ form.user.auto_id }}").select2();
-    })
-</script>
 {% endblock %}
