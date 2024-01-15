@@ -4,13 +4,15 @@ from django.contrib import messages
 from console_user_management.forms import (
     CustomUserCreationForm,
     RoleCreationForm,
-    RolePermissionAssignmentForm,
     UserRoleAssignmentForm,
     UserSelectionForm,
     CustomUserChangeForm,
-    RoleSelectionForm
+    RoleSelectionForm,
 )
-from console_user_management.models import User, Permission, RolePermissionAssignment
+from console_user_management.models import (
+    User,
+    Role,
+)
 
 
 # Create your views here.
@@ -21,14 +23,13 @@ def index(request):
 
 @login_required
 def user_creation(request):
+    form = CustomUserCreationForm()
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
             messages.success(request, "User added successfully.")
             return redirect("user_creation")
-
-    form = CustomUserCreationForm()
     args = {"form": form}
 
     return render(request, "console_user_management/user_creation.html", args)
@@ -36,52 +37,27 @@ def user_creation(request):
 
 @login_required
 def role_creation(request):
+    form = RoleCreationForm()
     if request.method == "POST":
-        role_form = RoleCreationForm(request.POST)
-        if role_form.is_valid():
-            role = role_form.save()
-            req_data = dict(request.POST)
-            for permission_name, permission_level in zip(
-                req_data.get("permission", None), req_data.get("permission_level", None)
-            ):
-                permission = Permission.objects.get(permission_name=permission_name)
-                role_perm_assignment = RolePermissionAssignment(
-                    role=role, permission=permission, permission_level=permission_level
-                )
-                role_perm_assignment.save()
-
-            messages.success(request, "Role created and permissions set!")
+        form = RoleCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Role created successfully!")
             return redirect("role_creation")
 
-    role_form = RoleCreationForm()
-    role_perm_assignment_forms = []
-    permissions = Permission.objects.all()
-    for permission in permissions:
-        role_perm_assignment_forms.append(
-            RolePermissionAssignmentForm(
-                initial={"permission": permission.permission_name}
-            )
-        )
-
-    args = {
-        "role_form": role_form,
-        "role_perm_assignment_forms": role_perm_assignment_forms,
-    }
-
+    args = {"form": form}
     return render(request, "console_user_management/role_creation.html", args)
 
 
 @login_required
 def user_role_assignment(request):
+    form = UserRoleAssignmentForm()
     if request.method == "POST":
         form = UserRoleAssignmentForm(request.POST)
         if form.is_valid():
             form.save()
             messages.success(request, "Association created successfully!")
             return redirect("user_role_assignment")
-
-    form = UserRoleAssignmentForm()
-
     args = {"form": form}
 
     return render(request, "console_user_management/user_role_assignment.html", args)
@@ -89,6 +65,7 @@ def user_role_assignment(request):
 
 @login_required
 def user_modification(request):
+    form = UserSelectionForm()
     if request.method == "POST":
         form = UserSelectionForm(request.POST)
         if form.is_valid():
@@ -98,8 +75,6 @@ def user_modification(request):
             return render(
                 request, "console_user_management/user_selection.html", {"form": form}
             )
-
-    form = UserSelectionForm()
     args = {"form": form}
     return render(request, "console_user_management/user_selection.html", args)
 
@@ -107,6 +82,7 @@ def user_modification(request):
 @login_required
 def user_modification_form(request, pk):
     user = get_object_or_404(User, pk=pk)
+    form = CustomUserChangeForm(instance=user)
 
     if request.method == "POST":
         form = CustomUserChangeForm(request.POST, instance=user)
@@ -118,14 +94,13 @@ def user_modification_form(request, pk):
             return render(
                 request, "console_user_management/user_selection.html", {"form": form}
             )
-
-    form = CustomUserChangeForm(instance=user)
     args = {"form": form}
     return render(request, "console_user_management/user_modification_form.html", args)
 
 
 @login_required
 def user_deletion(request):
+    form = UserSelectionForm()
     if request.method == "POST":
         form = UserSelectionForm(request.POST)
         if form.is_valid():
@@ -133,15 +108,14 @@ def user_deletion(request):
             user.delete()
             messages.success(request, "User deleted successfully.")
             return redirect("user_deletion")
-
-    form = UserSelectionForm()
-
     args = {"form": form}
 
     return render(request, "console_user_management/user_deletion.html", args)
 
+
 @login_required
 def role_deletion(request):
+    form = RoleSelectionForm()
     if request.method == "POST":
         form = RoleSelectionForm(request.POST)
         if form.is_valid():
@@ -152,8 +126,42 @@ def role_deletion(request):
         else:
             args = {"form": form}
             return render(request, "console_user_management/role_deletion.html", args)
-    
-    form = RoleSelectionForm()
     args = {"form": form}
 
     return render(request, "console_user_management/role_deletion.html", args)
+
+
+@login_required
+def role_modification(request):
+    form = RoleSelectionForm()
+    if request.method == "POST":
+        form = RoleSelectionForm(request.POST)
+        if form.is_valid():
+            role = form.cleaned_data.get("role")
+            return redirect("role_modification_form", pk=role.pk)
+        else:
+            print(form.errors)
+            return render(
+                request, "console_user_management/role_selection.html", {"form": form}
+            )
+    args = {"form": form}
+    return render(request, "console_user_management/role_selection.html", args)
+
+
+@login_required
+def role_modification_form(request, pk):
+    role = get_object_or_404(Role, pk=pk)
+    form = RoleCreationForm(instance=role)
+
+    if request.method == "POST":
+        form = RoleCreationForm(request.POST, instance=role)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Role Modified Successfully!")
+            return redirect("role_modification")
+
+    args = {
+        "form": form
+    }
+
+    return render(request, "console_user_management/role_modification_form.html", args)

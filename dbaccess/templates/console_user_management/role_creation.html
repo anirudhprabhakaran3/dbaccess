@@ -17,18 +17,7 @@ Role Creation
     {% endfor %}
     <form method="post">
         {% csrf_token %}
-        <div class="d-flex flex-row">
-            <div>
-                {{ role_form | crispy }}
-            </div>
-            <div class="d-flex flex-wrap">
-                {% for form in role_perm_assignment_forms %}
-                <div class="border m-1 p-1">
-                    {{ form | crispy }}
-                </div>
-                {% endfor %}
-            </div>
-        </div>
+        {{ form | crispy }}
         <button type="submit" class="btn btn-primary">Create Role</button>
     </form>
 </div>

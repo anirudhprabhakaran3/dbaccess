@@ -3,7 +3,6 @@ from django import forms
 from console_user_management.models import (
     User,
     Role,
-    RolePermissionAssignment,
     UserRoleAssignment,
 )
 
@@ -31,19 +30,21 @@ class CustomUserChangeForm(UserChangeForm):
 class RoleCreationForm(forms.ModelForm):
     class Meta:
         model = Role
-        fields = ("role_name", "role_description", "role_expiry")
-        widgets = {"role_expiry": forms.DateTimeInput(attrs={"type": "datetime-local"})}
-
-
-class RolePermissionAssignmentForm(forms.ModelForm):
-    class Meta:
-        model = RolePermissionAssignment
         fields = (
-            "permission",
-            "permission_level",
-        )
+            "role_name",
+            "role_description",
+            "role_expiry",
 
-        widgets = {"permission": forms.TextInput(attrs={"readonly": "readonly"})}
+            "console_user_management",
+            "enterprise_meta_data_management",
+            "enterprise_policy_management",
+            "enterprise_data_product_management",
+            "enterprise_role_config_management",
+            "enterprise_policy_config_management",
+            "enterprise_user_group_config_management",
+            "enterprise_user_config_management",
+        )
+        widgets = {"role_expiry": forms.DateTimeInput(attrs={"type": "datetime-local"})}
 
 
 class UserRoleAssignmentForm(forms.ModelForm):

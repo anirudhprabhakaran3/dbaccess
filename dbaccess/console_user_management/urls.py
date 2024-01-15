@@ -18,4 +18,10 @@ urlpatterns = [
     ),
     path("user_deletion/", views.user_deletion, name="user_deletion"),
     path("role_deletion/", views.role_deletion, name="role_deletion"),
+    path("role_modification/", views.role_modification, name="role_modification"),
+    path(
+        "role_modification/<int:pk>",
+        views.role_modification_form,
+        name="role_modification_form",
+    ),
 ]
