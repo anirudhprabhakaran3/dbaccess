@@ -55,8 +55,31 @@ class UserRoleAssignmentForm(forms.ModelForm):
         widgets = {"expiry_date": forms.DateTimeInput(attrs={"type": "datetime-local"})}
 
 
+class UserRoleMassUpdateForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(UserRoleMassUpdateForm, self).__init__(*args, **kwargs)
+        self.initial['user'] = self.instance.user.email
+        self.initial['role'] = self.instance.role.role_name
+
+    class Meta:
+        model = UserRoleAssignment
+        fields = (
+            "user",
+            "role",
+            "expiry_date"
+        )
+
+        widgets = {
+            "user": forms.TextInput(attrs={"readonly": "readonly", "class": "form-control disabled"}),
+            "role": forms.TextInput(attrs={"readonly": "readonly", "class": "form-control disabled"}),
+            "expiry_date": forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control"}),
+        }
+
+
 class UserSelectionForm(forms.Form):
     user = forms.ModelChoiceField(queryset=User.objects.all())
+
 
 class RoleSelectionForm(forms.Form):
     role = forms.ModelChoiceField(queryset=Role.objects.all())

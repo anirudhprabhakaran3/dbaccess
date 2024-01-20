@@ -1,0 +1,56 @@
+{% extends 'console_user_management/base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}
+    Mass Update
+    {{ block.super }}
+{% endblock %}
+
+{% block mainbar %}
+    <div class="p-1">
+        <h2>Mass Update</h2>
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+        <form method="post">
+            <button type="submit" name="update" class="btn btn-info">Update</button>
+            <button type="submit" name="delete" class="btn btn-danger">Delete</button>
+            {{ formset.management_form }}
+            {{ formset.non_form_errors }}
+            {% csrf_token %}
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Expiry Date</th>
+                    <th>Delete?</th>
+                </tr>
+                </thead>
+                {% for form in formset %}
+                    {% for hidden in form.hidden_fields %}
+                        {{ hidden }}
+                    {% endfor %}
+                    <tr>
+                        <td>
+                            {{ form.user }}
+                            <span class="text-danger">{{ form.user.errors }}</span>
+                        </td>
+                        <td>
+                            {{ form.role }}
+                            <span class="text-danger">{{ form.role.errors }}</span>
+                        </td>
+                        <td>
+                            {{ form.expiry_date }}
+                            <span class="text-danger">{{ form.expiry_date.errors }}</span>
+                        </td>
+                        <td>{{ form.DELETE }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </form>
+    </div>
+{% endblock %}

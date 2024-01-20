@@ -1,6 +1,8 @@
+import copy
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.forms import modelformset_factory
 from console_user_management.forms import (
     CustomUserCreationForm,
     RoleCreationForm,
@@ -8,10 +10,12 @@ from console_user_management.forms import (
     UserSelectionForm,
     CustomUserChangeForm,
     RoleSelectionForm,
+    UserRoleMassUpdateForm
 )
 from console_user_management.models import (
     User,
     Role,
+    UserRoleAssignment
 )
 
 
@@ -165,3 +169,27 @@ def role_modification_form(request, pk):
     }
 
     return render(request, "console_user_management/role_modification_form.html", args)
+
+
+@login_required
+def mass_update(request):
+    UserRoleAssignmentFormset = modelformset_factory(UserRoleAssignment, fields=["user", "role", "expiry_date"],
+                                                     extra=0, form=UserRoleMassUpdateForm, can_delete=True)
+    formset = UserRoleAssignmentFormset()
+
+    if request.method == "POST":
+        formset = UserRoleAssignmentFormset(request.POST, queryset=UserRoleAssignment.objects.all())
+        if formset.is_valid():
+            if "update" in request.POST:
+                formset.save()
+                messages.success(request, "Values updated!")
+                return redirect("mass_update")
+            elif "delete" in request.POST:
+                formset.save()
+                messages.success(request, "Values deleted!")
+                return redirect("mass_update")
+    args = {
+        "formset": formset,
+    }
+
+    return render(request, "console_user_management/mass_update.html", args)

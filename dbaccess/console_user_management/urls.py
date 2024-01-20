@@ -24,4 +24,5 @@ urlpatterns = [
         views.role_modification_form,
         name="role_modification_form",
     ),
+    path("mass_update/", views.mass_update, name="mass_update"),
 ]
