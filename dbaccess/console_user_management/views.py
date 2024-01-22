@@ -1,8 +1,8 @@
-import copy
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.forms import modelformset_factory
+import datetime
 from console_user_management.forms import (
     CustomUserCreationForm,
     RoleCreationForm,
@@ -10,13 +10,14 @@ from console_user_management.forms import (
     UserSelectionForm,
     CustomUserChangeForm,
     RoleSelectionForm,
-    UserRoleMassUpdateForm
 )
 from console_user_management.models import (
     User,
     Role,
     UserRoleAssignment
 )
+
+from console_user_management.serializers import user_role_assignment_serializer
 
 
 # Create your views here.
@@ -172,24 +173,43 @@ def role_modification_form(request, pk):
 
 
 @login_required
-def mass_update(request):
-    UserRoleAssignmentFormset = modelformset_factory(UserRoleAssignment, fields=["user", "role", "expiry_date"],
-                                                     extra=0, form=UserRoleMassUpdateForm, can_delete=True)
-    formset = UserRoleAssignmentFormset()
-
-    if request.method == "POST":
-        formset = UserRoleAssignmentFormset(request.POST, queryset=UserRoleAssignment.objects.all())
-        if formset.is_valid():
-            if "update" in request.POST:
-                formset.save()
-                messages.success(request, "Values updated!")
-                return redirect("mass_update")
-            elif "delete" in request.POST:
-                formset.save()
-                messages.success(request, "Values deleted!")
-                return redirect("mass_update")
+def edit_user_role_association(request):
+    users = User.objects.all()
     args = {
-        "formset": formset,
+        "users": users,
     }
+    return render(request, "console_user_management/edit_user_role_association.html", args)
 
-    return render(request, "console_user_management/mass_update.html", args)
+
+@login_required
+def get_role_assignments_from_user_id(request):
+    if request.method == "POST":
+        user_id = request.POST.get("user_id")
+        user = User.objects.get(pk=user_id)
+        assignments = UserRoleAssignment.objects.filter(user=user)
+
+        if request.POST.get("role_id") is not None:
+            role = Role.objects.get(pk=request.POST.get("role_id"))
+            assignments = assignments.filter(role=role)
+
+        assignments = user_role_assignment_serializer(assignments)
+        return JsonResponse({"data": assignments})
+
+
+@login_required
+def update_user_role_assignment(request):
+    if request.method == "POST":
+        user_id = request.POST.get("users")
+        role_id = request.POST.get("roles")
+        expiry_date = request.POST.get("expiry_date")
+        expiry_date = datetime.datetime.strptime(expiry_date, "%Y-%m-%dT%H:%M")
+
+        user = User.objects.get(pk=user_id)
+        role = Role.objects.get(pk=role_id)
+        assignment = UserRoleAssignment.objects.get(user=user, role=role)
+
+        assignment.expiry_date = expiry_date
+        assignment.save()
+
+        messages.success(request, "Updated association")
+        return redirect("edit_user_role_association")

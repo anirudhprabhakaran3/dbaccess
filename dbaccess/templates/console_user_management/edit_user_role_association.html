@@ -1,0 +1,104 @@
+{% extends 'console_user_management/base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}
+    Edit User Role Association
+    {{ block.super }}
+{% endblock %}
+
+{% block mainbar %}
+    <div class="p-1">
+        <h2>Edit User Role Association</h2>
+    </div>
+    <div class="px-5">
+        <form method="post" action="{% url 'update_user_role_assignment' %}">
+            {% csrf_token %}
+            <div class="alert alert-error" id="errorMessage"></div>
+            <div class="row">
+                <label for="users">Select User</label>
+                <select name="users" class="form-select" id="user_select">
+                    <option disabled selected value> -- select an option --</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.email }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="row">
+                <label for="roles">Select Role</label>
+                <select name="roles" class="form-select" id="role_select" disabled>
+                    <option disabled selected value> -- select an option --</option>
+                </select>
+            </div>
+
+            <div class="row">
+                <label for="expiry_date">Expiry Date</label>
+                <input name="expiry_date" type="datetime-local" id="expiry_date" class="form-control" disabled>
+            </div>
+
+            <div class="row my-2">
+                <button type="submit" id="submitButton" class="btn btn-success" disabled>Update</button>
+            </div>
+        </form>
+    </div>
+    <script>
+        $(document).ready(function () {
+            $("#user_select").select2({
+                theme: "classic"
+            });
+        })
+
+        $("#user_select").change(function () {
+            const user_id = $(this).val();
+            const form_data = {
+                "user_id": user_id,
+                "csrfmiddlewaretoken": "{{ csrf_token }}",
+            };
+            $.ajax("{% url 'user_assignments' %}", {
+                method: "POST",
+                data: form_data,
+                success: function (response, status, xhr) {
+                    const data = response["data"];
+                    const role_select = $("#role_select");
+                    role_select.find("option").remove().end();
+                    role_select.append($('<option>').attr("disabled", "disabled").attr("selected", "selected").text("-- select an option --"));
+                    data.map(function (opt) {
+                        role_select.append($('<option>', {value: opt.role.id}).text(opt.role.role_name));
+                    });
+                    role_select.removeAttr("disabled").select2({
+                        theme: "classic"
+                    });
+                },
+                error: function (jqXhr, textStatus, errorMessage) {
+                    $("#errorMessage").html(errorMessage);
+                }
+            })
+        });
+
+        $("#role_select").change(function () {
+            const user_id = $("#user_select").val();
+            const role_id = $(this).val();
+
+            const form_data = {
+                "user_id": user_id,
+                "role_id": role_id,
+                "csrfmiddlewaretoken": "{{ csrf_token }}",
+            };
+
+            $.ajax("{% url 'user_assignments' %}", {
+                method: "POST",
+                data: form_data,
+                success: function (response, status, xhr) {
+                    const data = response["data"][0];
+                    $("#expiry_date").removeAttr("disabled").val(data.expiry_date.slice(0, 16));
+                    $("#submitButton").removeAttr("disabled");
+                },
+                error: function (jqXhr, textStatus, errorMessage) {
+                    $("#errorMessage").html(errorMessage);
+                }
+            })
+
+        });
+    </script>
+{% endblock %}
