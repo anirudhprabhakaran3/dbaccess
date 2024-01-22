@@ -11,9 +11,33 @@
     <div class="p-1">
         <h2>Mass Update</h2>
         <form method="post">
-            <button type="submit" name="update" class="btn btn-success">Save</button>
+            {{ formset.management_form }}
+
             {% csrf_token %}
-            {{ formset | crispy }}
+            <table class="table">
+                <thead>
+                <th></th>
+                <th>User</th>
+                <th>Role</th>
+                <th>Expiry Date</th>
+                <th>Delete</th>
+                </thead>
+                <tbody>
+                {% for form in formset %}
+                    <tr>
+                        {{ form.id }}
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ form.instance.user }}</td>
+                        <td>{{ form.instance.role }}</td>
+                        <td>
+                            {{ form.expiry_date }}
+                        </td>
+                        <td>{{ form.DELETE }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <input type="submit" value="Submit" class="btn btn-success">
         </form>
     </div>
 {% endblock %}

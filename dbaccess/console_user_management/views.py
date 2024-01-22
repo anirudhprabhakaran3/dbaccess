@@ -2,6 +2,8 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.forms import modelformset_factory
+from django import forms
 import datetime
 from console_user_management.forms import (
     CustomUserCreationForm,
@@ -213,3 +215,36 @@ def update_user_role_assignment(request):
 
         messages.success(request, "Updated association")
         return redirect("edit_user_role_association")
+
+
+@login_required
+def mass_update(request):
+    user_role_assignments = UserRoleAssignment.objects.all().order_by("-pk")
+
+    user_role_assignment_form = modelformset_factory(
+        UserRoleAssignment,
+        fields=["expiry_date"],
+        can_delete=True,
+        extra=0,
+        widgets={
+            "expiry_date": forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control"}),
+        }
+    )
+    formset = user_role_assignment_form(queryset=user_role_assignments)
+
+    if request.method == "POST":
+        formset = user_role_assignment_form(request.POST)
+        if formset.is_valid():
+            formset.save()
+            messages.success(request, "Updated values!")
+            return redirect("mass_update")
+        else:
+            print("formset validation failed")
+            print(formset.non_form_errors())
+            print(formset.errors)
+
+    args = {
+        "formset": formset
+    }
+
+    return render(request, "console_user_management/mass_update.html", args)

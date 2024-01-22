@@ -27,4 +27,5 @@ urlpatterns = [
     path("edit_user_role_association/", views.edit_user_role_association, name="edit_user_role_association"),
     path("user_role_association/update/", views.update_user_role_assignment, name="update_user_role_assignment"),
     path("user/assignments", views.get_role_assignments_from_user_id, name="user_assignments"),
+    path("mass_update/", views.mass_update, name="mass_update"),
 ]
