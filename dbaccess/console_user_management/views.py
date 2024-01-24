@@ -248,3 +248,50 @@ def mass_update(request):
     }
 
     return render(request, "console_user_management/mass_update.html", args)
+
+
+@login_required
+def reports(request):
+    return render(request, "console_user_management/reports.html")
+
+
+@login_required
+def reports_user(request):
+    form = UserSelectionForm()
+
+    if request.method == "POST":
+        user_id = request.POST.get("id")
+        user = User.objects.get(pk=user_id)
+        assignments = UserRoleAssignment.objects.filter(user=user)
+        assignments = user_role_assignment_serializer(assignments)
+        return JsonResponse({"data": assignments})
+
+    args = {
+        "form": form,
+        "title": "User Reports",
+        "user": True,
+        "role": False,
+    }
+
+    return render(request, "console_user_management/reports_selection.html", args)
+
+
+@login_required
+def reports_role(request):
+    form = RoleSelectionForm()
+
+    if request.method == "POST":
+        role_id = request.POST.get("id")
+        role = Role.objects.get(pk=role_id)
+        assignments = UserRoleAssignment.objects.filter(role=role)
+        assignments = user_role_assignment_serializer(assignments)
+        return JsonResponse({"data": assignments})
+
+    args = {
+        "form": form,
+        "title": "Role Reports",
+        "role": True,
+        "user": False
+    }
+
+    return render(request, "console_user_management/reports_selection.html", args)

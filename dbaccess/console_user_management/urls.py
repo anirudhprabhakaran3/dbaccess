@@ -28,4 +28,7 @@ urlpatterns = [
     path("user_role_association/update/", views.update_user_role_assignment, name="update_user_role_assignment"),
     path("user/assignments", views.get_role_assignments_from_user_id, name="user_assignments"),
     path("mass_update/", views.mass_update, name="mass_update"),
+    path("reports/", views.reports, name="reports"),
+    path("reports/user", views.reports_user, name="reports_user"),
+    path("reports/role", views.reports_role, name="reports_role"),
 ]

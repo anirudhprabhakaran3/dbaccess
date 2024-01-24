@@ -1,0 +1,149 @@
+{% extends "console_user_management/reports.html" %}
+
+{% load crispy_forms_tags %}
+
+
+{% block title %}
+    {{ title }} |
+    {{ block.super }}
+{% endblock %}
+
+{% block tab %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form | crispy }}
+    </form>
+
+    <div class="alert alert-danger d-none" id="danger_alert"></div>
+
+    <div class="container d-none" id="report_content">
+        {% if user %}
+            <p>
+                User: <span class="fw-bolder" id="user_email"></span>
+            </p>
+
+            <table id="users_table" class="table table-striped table-hover">
+            </table>
+        {% endif %}
+
+        {% if role %}
+            <p>
+                Role: <span class="fw-bolder" id="role_name"></span>
+            </p>
+
+            <table id="roles_table" class="table table-striped table-hover">
+            </table>
+        {% endif %}
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            {% if user %}
+                const options = $("#{{ form.user.auto_id }}");
+                const url = "{% url 'reports_user' %}";
+            {% endif %}
+
+            {% if role %}
+                const options = $("#{{ form.role.auto_id }}");
+                const url = "{% url 'reports_role' %}";
+            {% endif %}
+
+            options.select2();
+
+            options.change(function () {
+                const id = $(this).val();
+                const form_data = {
+                    "id": id,
+                    "csrfmiddlewaretoken": "{{ csrf_token }}",
+                };
+
+                $.ajax(url, {
+                    method: "POST",
+                    data: form_data,
+                    success: function (response, status, xhr) {
+                        const response_data = response["data"];
+                        if (response_data.length == 0) {
+                            $("#danger_alert").html("No data available. Please make assignments.")
+                                .removeClass("d-none")
+                                .addClass("d-block");
+                        } else {
+                            $("#danger_alert").addClass("d-none").removeClass("d-block");
+                            {% if user %}
+                                $("#user_email").html(response_data[0].user.email);
+
+                                const users_table = $("#users_table");
+
+                                users_table.empty();
+                                let table_heading = `
+                                    <thead>
+                                        <tr class="rowClass"">
+                                            <th>
+                                                Roles
+                                            </th>
+                                            <th>
+                                                Expiry Date
+                                            </th>
+                                        </tr>
+                                    </thead>`;
+
+                                users_table.append(table_heading);
+                                users_table.append("<tbody id='users_tbody'>");
+
+                                response_data.map(function (d) {
+                                    let row = `
+                                        <tr>
+                                            <td>${d.role.role_name}</td>
+                                            <td>${d.expiry_date}</td>
+                                        </tr>
+                                    `;
+                                    $("#users_tbody").append(row);
+                                });
+
+                                $("#report_content").removeClass("d-none").addClass("d-block");
+                            {% endif %}
+
+                            {% if role %}
+                                $("#role_name").html(response_data[0].role.role_name);
+
+                                const roles_table = $("#roles_table");
+
+                                roles_table.empty();
+                                let table_heading = `
+                                    <thead>
+                                        <tr class="rowClass"">
+                                            <th>
+                                                Users
+                                            </th>
+                                            <th>
+                                                Expiry Date
+                                            </th>
+                                        </tr>
+                                    </thead>`;
+
+                                roles_table.append(table_heading);
+                                roles_table.append("<tbody id='role_tbody'>");
+
+                                response_data.map(function (d) {
+                                    let row = `
+                                        <tr>
+                                            <td>${d.user.email}</td>
+                                            <td>${d.expiry_date}</td>
+                                        </tr>
+                                    `;
+                                    $("#role_tbody").append(row);
+                                })
+
+                                $("#report_content").removeClass("d-none").addClass("d-block");
+                            {% endif %}
+                        }
+                    },
+                    error: function (jqXhr, textStatus, errorMessage) {
+                        alert(errorMessage);
+                    }
+                })
+            })
+        });
+    </script>
+
+{% endblock %}

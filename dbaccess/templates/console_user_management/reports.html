@@ -1,0 +1,26 @@
+{% extends 'console_user_management/base.html' %}
+
+{% block title %}
+    Reports |
+    {{ block.super }}
+{% endblock %}
+
+{% block mainbar %}
+    <div class="p-1">
+        <h2>Reports</h2>
+
+        <ul class="nav nav-tabs">
+            <li class="nav-item" id="user_tab">
+                <a class="nav-link" href="{% url 'reports_user' %}">User Report</a>
+            </li>
+            <li class="nav-item" id="role_tab">
+                <a class="nav-link" href="{% url 'reports_role' %}">Role Report</a>
+            </li>
+        </ul>
+
+        <div class="reports_container container">
+            {% block tab %}
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}
